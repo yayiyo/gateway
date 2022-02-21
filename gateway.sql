@@ -38,7 +38,7 @@ CREATE TABLE `admin` (
 -- Records of admin
 -- ----------------------------
 BEGIN;
-INSERT INTO `admin` VALUES (1, 'admin', 'admin', '2823d896e9822c0833d41d4904f0c00756d718570fce49b9a379a62c804689d3', '2020-04-10 16:42:05', '2020-04-21 06:35:08', 0);
+INSERT INTO `admin` VALUES (1, 'admin', 'admin', 'ac0e7d037817094e9e0b4441f9bae3209d67b02fa484917065f71b16109a1a78', '2020-04-10 16:42:05', '2020-04-21 06:35:08', 0);
 COMMIT;
 
 -- ----------------------------
