@@ -9,8 +9,8 @@ import (
 	"time"
 
 	dlog "gateway/log"
+	"github.com/echaser/gorm"
 	"github.com/spf13/viper"
-	"gorm.io/gorm"
 )
 
 type BaseConf struct {

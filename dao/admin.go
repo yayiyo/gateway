@@ -5,9 +5,9 @@ import (
 
 	"gateway/dto"
 	"gateway/public"
+	"github.com/echaser/gorm"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-	"gorm.io/gorm"
 )
 
 type Admin struct {
@@ -40,7 +40,7 @@ func (a *Admin) LoginCheck(ctx *gin.Context, tx *gorm.DB, param *dto.AdminLoginI
 
 func (a *Admin) Find(c *gin.Context, tx *gorm.DB, search *Admin) (*Admin, error) {
 	admin := &Admin{}
-	err := tx.WithContext(c).Where(search).Find(admin).Error
+	err := tx.SetCtx(public.GetGinTraceContext(c)).Where(search).Find(admin).Error
 	if err != nil {
 		return nil, err
 	}
@@ -48,5 +48,5 @@ func (a *Admin) Find(c *gin.Context, tx *gorm.DB, search *Admin) (*Admin, error)
 }
 
 func (a *Admin) Save(c *gin.Context, tx *gorm.DB) error {
-	return tx.WithContext(c).Save(a).Error
+	return tx.SetCtx(public.GetGinTraceContext(c)).Save(a).Error
 }

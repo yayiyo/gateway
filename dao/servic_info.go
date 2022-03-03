@@ -4,8 +4,9 @@ import (
 	"time"
 
 	"gateway/dto"
+	"gateway/public"
+	"github.com/echaser/gorm"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type ServiceInfo struct {
@@ -22,7 +23,52 @@ func (*ServiceInfo) TableName() string {
 	return "service_info"
 }
 
-func (t *ServiceInfo) ServiceList(ctx *gin.Context, db *gorm.DB, input *dto.ServiceListInput) ([]*ServiceInfo, int64, error) {
+func (s *ServiceInfo) ServiceDetail(c *gin.Context, tx *gorm.DB, search *ServiceInfo) (*ServiceDetail, error) {
+	if search.ServiceName == "" {
+		err := s.Find(c, tx, search)
+		if err != nil {
+			return nil, err
+		}
+		search = s
+	}
+	httpRule := &HttpRule{ServiceID: search.ID}
+	httpRule, err := httpRule.Find(c, tx, httpRule)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+	tcpRule := &TCPRule{ServiceID: search.ID}
+	err = tcpRule.Find(c, tx, tcpRule)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+	grpcRule := &GrpcRule{ServiceID: search.ID}
+	grpcRule, err = grpcRule.Find(c, tx, grpcRule)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+	accessControl := &AccessControl{ServiceID: search.ID}
+	accessControl, err = accessControl.Find(c, tx, accessControl)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+	loadBalance := &LoadBalance{ServiceID: search.ID}
+	loadBalance, err = loadBalance.Find(c, tx, loadBalance)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+
+	detail := &ServiceDetail{
+		Info:          search,
+		HTTPRule:      httpRule,
+		TCPRule:       tcpRule,
+		GRPCRule:      grpcRule,
+		LoadBalance:   loadBalance,
+		AccessControl: accessControl,
+	}
+	return detail, nil
+}
+
+func (s *ServiceInfo) ServiceList(ctx *gin.Context, db *gorm.DB, input *dto.ServiceListInput) ([]*ServiceInfo, int64, error) {
 	var (
 		list  = make([]*ServiceInfo, 0)
 		total int64
@@ -31,13 +77,13 @@ func (t *ServiceInfo) ServiceList(ctx *gin.Context, db *gorm.DB, input *dto.Serv
 
 	offset := (input.Page - 1) * input.Size
 
-	query := db.WithContext(ctx).Table(t.TableName()).Where("is_delete=0")
+	query := db.SetCtx(public.GetGinTraceContext(ctx)).Table(s.TableName()).Where("is_delete=0")
 
 	if input.Info != "" {
 		query.Where(`(service_name like %?%) or (service_desc like %?%)`, input.Info, input.Info)
 	}
 
-	if err = query.Limit(input.Size).Offset(offset).Find(&list).Error; err != nil {
+	if err = query.Limit(input.Size).Offset(offset).Find(&list).Order("id desc").Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -48,15 +94,18 @@ func (t *ServiceInfo) ServiceList(ctx *gin.Context, db *gorm.DB, input *dto.Serv
 	return list, int64(len(list)), nil
 }
 
-func (t *ServiceInfo) Find(c *gin.Context, db *gorm.DB, search *ServiceInfo) (*ServiceInfo, error) {
-	out := &ServiceInfo{}
-	err := db.WithContext(c).Where(search).Find(out).Error
+func (s *ServiceInfo) Find(c *gin.Context, db *gorm.DB, search *ServiceInfo) error {
+	err := db.SetCtx(public.GetGinTraceContext(c)).Where(search).Find(s).Error
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return out, nil
+	return nil
 }
 
-func (t *ServiceInfo) Save(c *gin.Context, db *gorm.DB) error {
-	return db.WithContext(c).Save(t).Error
+func (s *ServiceInfo) Save(c *gin.Context, db *gorm.DB) error {
+	return db.SetCtx(public.GetGinTraceContext(c)).Save(s).Error
+}
+
+func (s *ServiceInfo) Delete(c *gin.Context, db *gorm.DB) error {
+	return db.SetCtx(public.GetGinTraceContext(c)).Delete(s).Error
 }
