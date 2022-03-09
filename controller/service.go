@@ -19,7 +19,7 @@ type ServiceController struct{}
 
 func ServiceRegister(r *gin.RouterGroup) {
 	service := new(ServiceController)
-	r.GET("/list", service.ServiceList)
+	r.GET("", service.ServiceList)
 	r.DELETE("/:id", service.ServiceDelete)
 	r.GET("/:id", service.ServiceDetail)
 	r.GET("/:id/stats", service.ServiceStats)
@@ -35,14 +35,14 @@ func ServiceRegister(r *gin.RouterGroup) {
 // @Summary 服务列表
 // @Description 服务列表
 // @Tags 服务管理
-// @ID /service/list
+// @ID /services
 // @Accept  json
 // @Produce  json
 // @Param info query string false "关键词"
 // @Param page query int true "页数"
 // @Param size query int true "每页个数"
 // @Success 200 {object} middleware.Response{data=dto.ServiceListOutput} "success"
-// @Router /service/list [get]
+// @Router /services [get]
 func (s *ServiceController) ServiceList(ctx *gin.Context) {
 	params := &dto.ServiceListInput{}
 	if err := params.BindValidParam(ctx); err != nil {
@@ -127,12 +127,12 @@ func (s *ServiceController) ServiceList(ctx *gin.Context) {
 // @Summary 服务删除
 // @Description 服务删除
 // @Tags 服务管理
-// @ID /service/{id}
+// @ID /services/{id}
 // @Accept  json
 // @Produce  json
 // @Param id path int true "服务ID"
 // @Success 200 {object} middleware.Response{data=string} "success"
-// @Router /service/{id} [delete]
+// @Router /services/{id} [delete]
 func (s *ServiceController) ServiceDelete(ctx *gin.Context) {
 
 	ids := ctx.Param("id")
@@ -171,12 +171,12 @@ func (s *ServiceController) ServiceDelete(ctx *gin.Context) {
 // @Summary 添加HTTP服务
 // @Description 管添加HTTP服务
 // @Tags 服务管理
-// @ID /service/http
+// @ID /services/http
 // @Accept  json
 // @Produce  json
 // @Param body body dto.ServiceAddHTTPInput true "body"
 // @Success 200 {object} middleware.Response{data=string} "success"
-// @Router /service/http [post]
+// @Router /services/http [post]
 func (*ServiceController) AddHTTPService(ctx *gin.Context) {
 	params := &dto.ServiceAddHTTPInput{}
 	if err := params.BindValidParam(ctx); err != nil {
@@ -272,13 +272,13 @@ func (*ServiceController) AddHTTPService(ctx *gin.Context) {
 // @Summary 修改HTTP服务
 // @Description 修改HTTP服务
 // @Tags 服务管理
-// @ID /service/http/{id}
+// @ID /services/http/{id}
 // @Accept  json
 // @Produce  json
 // @Param id path int64 true "ID"
 // @Param body body dto.ServiceUpdateHTTPInput true "body"
 // @Success 200 {object} middleware.Response{data=string} "success"
-// @Router /service/http/{id} [put]
+// @Router /services/http/{id} [put]
 func (*ServiceController) UpdateHTTPService(ctx *gin.Context) {
 	ids := ctx.Param("id")
 	id, err := strconv.ParseInt(ids, 10, 64)
@@ -371,12 +371,12 @@ func (*ServiceController) UpdateHTTPService(ctx *gin.Context) {
 // @Summary 服务详情
 // @Description 服务详情
 // @Tags 服务管理
-// @ID /service/{id}
+// @ID /services/{id}
 // @Accept  json
 // @Produce  json
 // @Param id path int64 true "服务ID"
 // @Success 200 {object} middleware.Response{data=dao.ServiceDetail} "success"
-// @Router /service/{id} [get]
+// @Router /services/{id} [get]
 func (*ServiceController) ServiceDetail(ctx *gin.Context) {
 	ids := ctx.Param("id")
 	id, err := strconv.ParseInt(ids, 10, 64)
@@ -410,12 +410,12 @@ func (*ServiceController) ServiceDetail(ctx *gin.Context) {
 // @Summary 服务统计
 // @Description 服务统计
 // @Tags 服务管理
-// @ID /service/{id}/stats
+// @ID /services/{id}/stats
 // @Accept  json
 // @Produce  json
 // @Param id query int64 true "服务ID"
 // @Success 200 {object} middleware.Response{data=dto.ServiceStatsOutput} "success"
-// @Router /service/{id}/stats [get]
+// @Router /services/{id}/stats [get]
 func (*ServiceController) ServiceStats(ctx *gin.Context) {
 	ids := ctx.Param("id")
 	id, err := strconv.ParseInt(ids, 10, 64)
@@ -467,12 +467,12 @@ func (*ServiceController) ServiceStats(ctx *gin.Context) {
 // @Summary TCP服务添加
 // @Description TCP服务添加
 // @Tags 服务管理
-// @ID /service/tcp
+// @ID /services/tcp
 // @Accept  json
 // @Produce  json
 // @Param body body dto.AddTCPServiceInput true "body"
 // @Success 200 {object} middleware.Response{data=string} "success"
-// @Router /service/tcp [post]
+// @Router /services/tcp [post]
 func (*ServiceController) AddTCPService(ctx *gin.Context) {
 	params := &dto.AddTCPServiceInput{}
 	if err := params.GetValidParams(ctx); err != nil {
@@ -575,13 +575,13 @@ func (*ServiceController) AddTCPService(ctx *gin.Context) {
 // @Summary TCP服务更新
 // @Description TCP服务更新
 // @Tags 服务管理
-// @ID /service/tcp/{id}
+// @ID /services/tcp/{id}
 // @Accept  json
 // @Produce  json
 // @Param id query int64 true "服务ID"
 // @Param body body dto.UpdateTCPServiceInput true "body"
 // @Success 200 {object} middleware.Response{data=string} "success"
-// @Router /service/tcp/{id} [put]
+// @Router /services/tcp/{id} [put]
 func (*ServiceController) UpdateTCPService(ctx *gin.Context) {
 	ids := ctx.Param("id")
 	id, err := strconv.ParseInt(ids, 10, 64)
@@ -678,12 +678,12 @@ func (*ServiceController) UpdateTCPService(ctx *gin.Context) {
 // @Summary grpc服务添加
 // @Description grpc服务添加
 // @Tags 服务管理
-// @ID /service/grpc
+// @ID /services/grpc
 // @Accept  json
 // @Produce  json
 // @Param body body dto.AddGrpcServiceInput true "body"
 // @Success 200 {object} middleware.Response{data=string} "success"
-// @Router /service/grpc [post]
+// @Router /services/grpc [post]
 func (*ServiceController) AddGrpcService(ctx *gin.Context) {
 	params := &dto.AddGrpcServiceInput{}
 	if err := params.GetValidParams(ctx); err != nil {
@@ -788,13 +788,13 @@ func (*ServiceController) AddGrpcService(ctx *gin.Context) {
 // @Summary grpc服务更新
 // @Description grpc服务更新
 // @Tags 服务管理
-// @ID /service/grpc/{id}
+// @ID /services/grpc/{id}
 // @Accept  json
 // @Produce  json
 // @Param id query int64 true "服务ID"
 // @Param body body dto.UpdateGrpcServiceInput true "body"
 // @Success 200 {object} middleware.Response{data=string} "success"
-// @Router /service/grpc/{id} [put]
+// @Router /services/grpc/{id} [put]
 func (*ServiceController) UpdateGrpcService(ctx *gin.Context) {
 	ids := ctx.Param("id")
 	id, err := strconv.ParseInt(ids, 10, 64)

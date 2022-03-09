@@ -134,9 +134,9 @@ CREATE TABLE `tcp_rule` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='网关路由匹配表';
 
 -- ----------------------------
--- Table structure for tenant
+-- Table structure for app
 -- ----------------------------
-DROP TABLE IF EXISTS `tenant`;
+DROP TABLE IF EXISTS `app`;
 CREATE TABLE `tenant` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增id',
   `app_id` varchar(255) NOT NULL DEFAULT '' COMMENT '租户id',

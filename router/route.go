@@ -99,7 +99,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	)
 	controller.AdminRegister(adminRouter)
 
-	service := router.Group("/service")
+	service := router.Group("/services")
 	service.Use(
 		sessions.Sessions("session", store),
 		middleware.RecoveryMiddleware(),
@@ -109,5 +109,27 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	)
 
 	controller.ServiceRegister(service)
+
+	appRouter := router.Group("/apps")
+	appRouter.Use(
+		sessions.Sessions("session", store),
+		middleware.RecoveryMiddleware(),
+		middleware.RequestLog(),
+		middleware.SessionAuthMiddleware(),
+		middleware.TranslationMiddleware())
+
+	controller.APPRegister(appRouter)
+
+	dashRouter := router.Group("/dashboard")
+	dashRouter.Use(
+		sessions.Sessions("session", store),
+		middleware.RecoveryMiddleware(),
+		middleware.RequestLog(),
+		middleware.SessionAuthMiddleware(),
+		middleware.TranslationMiddleware())
+
+	controller.DashboardRegister(dashRouter)
+
+	router.Static("/dist", "./dist")
 	return router
 }

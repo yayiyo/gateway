@@ -18,6 +18,29 @@ definitions:
       white_list:
         type: string
     type: object
+  dao.App:
+    properties:
+      app_id:
+        type: string
+      create_at:
+        type: string
+      id:
+        type: integer
+      is_delete:
+        type: integer
+      name:
+        type: string
+      qpd:
+        type: integer
+      qps:
+        type: integer
+      secret:
+        type: string
+      update_at:
+        type: string
+      white_ips:
+        type: string
+    type: object
   dao.GrpcRule:
     properties:
       header_transfer:
@@ -119,6 +142,78 @@ definitions:
         type: integer
       service_id:
         type: integer
+    type: object
+  dto.APPAddHttpInput:
+    properties:
+      app_id:
+        type: string
+      name:
+        type: string
+      qpd:
+        type: integer
+      qps:
+        type: integer
+      secret:
+        type: string
+      white_ips:
+        type: string
+    required:
+    - app_id
+    - name
+    type: object
+  dto.APPListItemOutput:
+    properties:
+      app_id:
+        type: string
+      create_at:
+        type: string
+      id:
+        type: integer
+      is_delete:
+        type: integer
+      name:
+        type: string
+      qpd:
+        type: integer
+      qps:
+        type: integer
+      real_qpd:
+        type: integer
+      real_qps:
+        type: integer
+      secret:
+        type: string
+      update_at:
+        type: string
+      white_ips:
+        type: string
+    type: object
+  dto.APPListOutput:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/dto.APPListItemOutput'
+        type: array
+      total:
+        type: integer
+    type: object
+  dto.APPUpdateHttpInput:
+    properties:
+      app_id:
+        type: string
+      name:
+        type: string
+      qpd:
+        type: integer
+      qps:
+        type: integer
+      secret:
+        type: string
+      white_ips:
+        type: string
+    required:
+    - name
+    - secret
     type: object
   dto.AddGrpcServiceInput:
     properties:
@@ -244,6 +339,37 @@ definitions:
     required:
     - old_pwd
     - password
+    type: object
+  dto.DashServiceStatsItemOutput:
+    properties:
+      load_type:
+        type: integer
+      name:
+        type: string
+      value:
+        type: integer
+    type: object
+  dto.DashServiceStatsOutput:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.DashServiceStatsItemOutput'
+        type: array
+      legend:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.PanelGroupDataOutput:
+    properties:
+      appNum:
+        type: integer
+      currentQps:
+        type: integer
+      serviceNum:
+        type: integer
+      todayRequestNum:
+        type: integer
     type: object
   dto.ServiceAddHTTPInput:
     properties:
@@ -485,6 +611,49 @@ definitions:
     - service_name
     - weight_list
     type: object
+  dto.StatisticsOutput:
+    properties:
+      today:
+        items:
+          type: integer
+        type: array
+      yesterday:
+        items:
+          type: integer
+        type: array
+    required:
+    - today
+    - yesterday
+    type: object
+  dto.TokensInput:
+    properties:
+      grant_type:
+        description: 授权类型
+        example: client_credentials
+        type: string
+      scope:
+        description: 权限范围
+        example: read_write
+        type: string
+    required:
+    - grant_type
+    - scope
+    type: object
+  dto.TokensOutput:
+    properties:
+      access_token:
+        description: access_token
+        type: string
+      expires_in:
+        description: expires_in
+        type: integer
+      scope:
+        description: scope
+        type: string
+      token_type:
+        description: token_type
+        type: string
+    type: object
   dto.UpdateGrpcServiceInput:
     properties:
       black_list:
@@ -672,15 +841,78 @@ paths:
       summary: 管理员登出
       tags:
       - 管理员
-  /service/{id}:
+  /apps:
+    get:
+      consumes:
+      - application/json
+      description: 租户列表
+      operationId: /apps
+      parameters:
+      - description: 关键词
+        in: query
+        name: info
+        type: string
+      - description: 每页多少条
+        in: query
+        name: size
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.APPListOutput'
+              type: object
+      summary: 租户列表
+      tags:
+      - 租户管理
+    post:
+      consumes:
+      - application/json
+      description: 租户添加
+      operationId: /apps
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.APPAddHttpInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: 租户添加
+      tags:
+      - 租户管理
+  /apps/{id}:
     delete:
       consumes:
       - application/json
-      description: 服务删除
-      operationId: /service/{id}
+      description: 租户删除
+      operationId: /apps/{id}
       parameters:
-      - description: 服务ID
-        in: path
+      - description: 租户ID
+        in: query
         name: id
         required: true
         type: integer
@@ -696,17 +928,17 @@ paths:
                 data:
                   type: string
               type: object
-      summary: 服务删除
+      summary: 租户删除
       tags:
-      - 服务管理
+      - 租户管理
     get:
       consumes:
       - application/json
-      description: 服务详情
-      operationId: /service/{id}
+      description: 租户详情
+      operationId: /apps/{id}
       parameters:
-      - description: 服务ID
-        in: path
+      - description: 租户ID
+        in: query
         name: id
         required: true
         type: integer
@@ -720,23 +952,71 @@ paths:
             - $ref: '#/definitions/middleware.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/dao.ServiceDetail'
+                  $ref: '#/definitions/dao.App'
               type: object
-      summary: 服务详情
+      summary: 租户详情
       tags:
-      - 服务管理
-  /service/{id}/stats:
+      - 租户管理
+    put:
+      consumes:
+      - application/json
+      description: 租户更新
+      operationId: /apps/{id}
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.APPUpdateHttpInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: 租户更新
+      tags:
+      - 租户管理
+  /apps/{id}/stats:
     get:
       consumes:
       - application/json
-      description: 服务统计
-      operationId: /service/{id}/stats
+      description: 租户统计
+      operationId: /apps/{id}/stats
       parameters:
-      - description: 服务ID
+      - description: 租户ID
         in: query
         name: id
         required: true
         type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.StatisticsOutput'
+              type: object
+      summary: 租户统计
+      tags:
+      - 租户管理
+  /dashboard/flow_stats:
+    get:
+      consumes:
+      - application/json
+      description: 服务统计
+      operationId: /dashboard/flow_stats
       produces:
       - application/json
       responses:
@@ -751,20 +1031,62 @@ paths:
               type: object
       summary: 服务统计
       tags:
-      - 服务管理
-  /service/grpc:
+      - 首页大盘
+  /dashboard/panel_group_data:
+    get:
+      consumes:
+      - application/json
+      description: 指标统计
+      operationId: /dashboard/panel_group_data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PanelGroupDataOutput'
+              type: object
+      summary: 指标统计
+      tags:
+      - 首页大盘
+  /dashboard/service_stats:
+    get:
+      consumes:
+      - application/json
+      description: 服务统计
+      operationId: /dashboard/service_stats
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DashServiceStatsOutput'
+              type: object
+      summary: 服务统计
+      tags:
+      - 首页大盘
+  /oauth/tokens:
     post:
       consumes:
       - application/json
-      description: grpc服务添加
-      operationId: /service/grpc
+      description: 获取TOKEN
+      operationId: /oauth/tokens
       parameters:
       - description: body
         in: body
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dto.AddGrpcServiceInput'
+          $ref: '#/definitions/dto.TokensInput'
       produces:
       - application/json
       responses:
@@ -775,111 +1097,17 @@ paths:
             - $ref: '#/definitions/middleware.Response'
             - properties:
                 data:
-                  type: string
+                  $ref: '#/definitions/dto.TokensOutput'
               type: object
-      summary: grpc服务添加
+      summary: 获取TOKEN
       tags:
-      - 服务管理
-  /service/grpc/{id}:
-    put:
-      consumes:
-      - application/json
-      description: grpc服务更新
-      operationId: /service/grpc/{id}
-      parameters:
-      - description: 服务ID
-        in: query
-        name: id
-        required: true
-        type: integer
-      - description: body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/dto.UpdateGrpcServiceInput'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: success
-          schema:
-            allOf:
-            - $ref: '#/definitions/middleware.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: grpc服务更新
-      tags:
-      - 服务管理
-  /service/http:
-    post:
-      consumes:
-      - application/json
-      description: 管添加HTTP服务
-      operationId: /service/http
-      parameters:
-      - description: body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/dto.ServiceAddHTTPInput'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: success
-          schema:
-            allOf:
-            - $ref: '#/definitions/middleware.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: 添加HTTP服务
-      tags:
-      - 服务管理
-  /service/http/{id}:
-    put:
-      consumes:
-      - application/json
-      description: 修改HTTP服务
-      operationId: /service/http/{id}
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/dto.ServiceUpdateHTTPInput'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: success
-          schema:
-            allOf:
-            - $ref: '#/definitions/middleware.Response'
-            - properties:
-                data:
-                  type: string
-              type: object
-      summary: 修改HTTP服务
-      tags:
-      - 服务管理
-  /service/list:
+      - OAUTH
+  /services:
     get:
       consumes:
       - application/json
       description: 服务列表
-      operationId: /service/list
+      operationId: /services
       parameters:
       - description: 关键词
         in: query
@@ -910,12 +1138,214 @@ paths:
       summary: 服务列表
       tags:
       - 服务管理
-  /service/tcp:
+  /services/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 服务删除
+      operationId: /services/{id}
+      parameters:
+      - description: 服务ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: 服务删除
+      tags:
+      - 服务管理
+    get:
+      consumes:
+      - application/json
+      description: 服务详情
+      operationId: /services/{id}
+      parameters:
+      - description: 服务ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dao.ServiceDetail'
+              type: object
+      summary: 服务详情
+      tags:
+      - 服务管理
+  /services/{id}/stats:
+    get:
+      consumes:
+      - application/json
+      description: 服务统计
+      operationId: /services/{id}/stats
+      parameters:
+      - description: 服务ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ServiceStatsOutput'
+              type: object
+      summary: 服务统计
+      tags:
+      - 服务管理
+  /services/grpc:
+    post:
+      consumes:
+      - application/json
+      description: grpc服务添加
+      operationId: /services/grpc
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddGrpcServiceInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: grpc服务添加
+      tags:
+      - 服务管理
+  /services/grpc/{id}:
+    put:
+      consumes:
+      - application/json
+      description: grpc服务更新
+      operationId: /services/grpc/{id}
+      parameters:
+      - description: 服务ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateGrpcServiceInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: grpc服务更新
+      tags:
+      - 服务管理
+  /services/http:
+    post:
+      consumes:
+      - application/json
+      description: 管添加HTTP服务
+      operationId: /services/http
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ServiceAddHTTPInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: 添加HTTP服务
+      tags:
+      - 服务管理
+  /services/http/{id}:
+    put:
+      consumes:
+      - application/json
+      description: 修改HTTP服务
+      operationId: /services/http/{id}
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ServiceUpdateHTTPInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: 修改HTTP服务
+      tags:
+      - 服务管理
+  /services/tcp:
     post:
       consumes:
       - application/json
       description: TCP服务添加
-      operationId: /service/tcp
+      operationId: /services/tcp
       parameters:
       - description: body
         in: body
@@ -938,12 +1368,12 @@ paths:
       summary: TCP服务添加
       tags:
       - 服务管理
-  /service/tcp/{id}:
+  /services/tcp/{id}:
     put:
       consumes:
       - application/json
       description: TCP服务更新
-      operationId: /service/tcp/{id}
+      operationId: /services/tcp/{id}
       parameters:
       - description: 服务ID
         in: query

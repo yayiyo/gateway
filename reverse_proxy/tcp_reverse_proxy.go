@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"gateway/reverse_proxy/load_balance"
-	"gateway/tcp_proxy_middleware"
+	"gateway/tcpproxy/middleware"
 )
 
-func NewTcpLoadBalanceReverseProxy(c *tcp_proxy_middleware.TcpSliceRouterContext, lb load_balance.LoadBalance) *TcpReverseProxy {
+func NewTcpLoadBalanceReverseProxy(c *middleware.TcpSliceRouterContext, lb load_balance.LoadBalance) *TcpReverseProxy {
 	return func() *TcpReverseProxy {
 		nextAddr, err := lb.Get("")
 		if err != nil {

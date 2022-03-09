@@ -68,6 +68,15 @@ func (s *ServiceInfo) ServiceDetail(c *gin.Context, tx *gorm.DB, search *Service
 	return detail, nil
 }
 
+func (s *ServiceInfo) GroupByLoadType(c *gin.Context, tx *gorm.DB) ([]*dto.DashServiceStatsItemOutput, error) {
+	list := make([]*dto.DashServiceStatsItemOutput, 0)
+	query := tx.SetCtx(public.GetGinTraceContext(c))
+	if err := query.Table(s.TableName()).Where("is_delete=0").Select("load_type, count(*) as value").Group("load_type").Scan(&list).Error; err != nil {
+		return nil, err
+	}
+	return list, nil
+}
+
 func (s *ServiceInfo) ServiceList(ctx *gin.Context, db *gorm.DB, input *dto.ServiceListInput) ([]*ServiceInfo, int64, error) {
 	var (
 		list  = make([]*ServiceInfo, 0)

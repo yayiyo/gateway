@@ -1,4 +1,4 @@
-package tcp_proxy_middleware
+package middleware
 
 import (
 	"fmt"

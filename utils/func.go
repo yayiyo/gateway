@@ -5,9 +5,7 @@ import (
 	"crypto/md5"
 	"encoding/binary"
 	"encoding/hex"
-	"flag"
 	"fmt"
-	dlog "gateway/log"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -17,6 +15,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	dlog "gateway/log"
 )
 
 var TimeLocation *time.Location
@@ -24,25 +24,19 @@ var TimeFormat = "2006-01-02 15:04:05"
 var DateFormat = "2006-01-02"
 var LocalIP = net.ParseIP("127.0.0.1")
 
-//公共初始化函数：支持两种方式设置配置文件
-//
-//函数传入配置文件 Init("./conf/dev/")
-//如果配置文件为空，会从命令行中读取 	  -config conf/dev/
-func Init(configPath string) error {
-	return InitModule(configPath, []string{"base", "mysql", "redis"})
+//函数传入配置文件 InitModule("./conf/dev/")
+func InitModule(configPath string) error {
+	return initModule(configPath, []string{"base", "mysql", "redis"})
 }
 
-//模块初始化
-func InitModule(configPath string, modules []string) error {
-	conf := flag.String("config", configPath, "input config file like ./conf/dev/")
-	flag.Parse()
-	if *conf == "" {
-		flag.Usage()
+func initModule(configPath string, modules []string) error {
+	if configPath == "" {
+		fmt.Println("input config file like ./conf/dev/")
 		os.Exit(1)
 	}
 
 	log.Println("------------------------------------------------------------------------")
-	log.Printf("[INFO]  config=%s\n", *conf)
+	log.Printf("[INFO]  config=%s\n", configPath)
 	log.Printf("[INFO] %s\n", " start loading resources.")
 
 	// 设置ip信息，优先设置便于日志打印
@@ -52,7 +46,7 @@ func InitModule(configPath string, modules []string) error {
 	}
 
 	// 解析配置文件目录
-	if err := ParseConfPath(*conf); err != nil {
+	if err := ParseConfPath(configPath); err != nil {
 		return err
 	}
 
@@ -64,21 +58,21 @@ func InitModule(configPath string, modules []string) error {
 	// 加载base配置
 	if InArrayString("base", modules) {
 		if err := InitBaseConf(GetConfPath("base")); err != nil {
-			fmt.Printf("[ERROR] %s%s\n", time.Now().Format(TimeFormat), " InitBaseConf:"+err.Error())
+			return fmt.Errorf("[ERROR] %s%s\n", time.Now().Format(TimeFormat), " InitBaseConf:"+err.Error())
 		}
 	}
 
 	// 加载redis配置
 	if InArrayString("redis", modules) {
 		if err := InitRedisConf(GetConfPath("redis_map")); err != nil {
-			fmt.Printf("[ERROR] %s%s\n", time.Now().Format(TimeFormat), " InitRedisConf:"+err.Error())
+			return fmt.Errorf("[ERROR] %s%s\n", time.Now().Format(TimeFormat), " InitRedisConf:"+err.Error())
 		}
 	}
 
 	// 加载mysql配置并初始化实例
 	if InArrayString("mysql", modules) {
 		if err := InitDBPool(GetConfPath("mysql_map")); err != nil {
-			fmt.Printf("[ERROR] %s%s\n", time.Now().Format(TimeFormat), " InitDBPool:"+err.Error())
+			return fmt.Errorf("[ERROR] %s%s\n", time.Now().Format(TimeFormat), " InitDBPool:"+err.Error())
 		}
 	}
 

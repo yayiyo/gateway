@@ -1,22 +1,81 @@
 package main
 
 import (
+	"flag"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"gateway/dao"
+	"gateway/grpcproxy"
+	"gateway/httpproxy"
 	"gateway/router"
+	"gateway/tcpproxy"
 	"gateway/utils"
 )
 
+//endpoint dashboard后台管理  server代理服务器
+//config ./conf/prod/ 对应配置文件夹
+
+var (
+	endpoint = flag.String("endpoint", "", "input endpoint dashboard or server")
+	config   = flag.String("config", "", "input config file like ./conf/dev/")
+)
+
 func main() {
-	utils.InitModule("./conf/dev/", []string{"base", "mysql", "redis"})
-	defer utils.Destroy()
-	router.HttpServerRun()
+	flag.Parse()
+	if *endpoint == "" {
+		flag.Usage()
+		os.Exit(1)
+	}
+	if *config == "" {
+		flag.Usage()
+		os.Exit(1)
+	}
 
-	quit := make(chan os.Signal)
-	signal.Notify(quit, syscall.SIGKILL, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
+	if *endpoint == "dashboard" {
+		err := utils.InitModule(*config)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer utils.Destroy()
+		router.HttpServerRun()
 
-	router.HttpServerStop()
+		quit := make(chan os.Signal)
+		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+		<-quit
+
+		router.HttpServerStop()
+	} else {
+		err := utils.InitModule(*config)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer utils.Destroy()
+		dao.ServiceManagerHandler.LoadOnce()
+		dao.AppManagerHandler.LoadOnce()
+
+		go func() {
+			httpproxy.HttpServerRun()
+		}()
+		go func() {
+			httpproxy.HttpsServerRun()
+		}()
+		go func() {
+			tcpproxy.TcpServerRun()
+		}()
+		go func() {
+			grpcproxy.GrpcServerRun()
+		}()
+
+		quit := make(chan os.Signal)
+		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+		<-quit
+
+		tcpproxy.TcpServerStop()
+		grpcproxy.GrpcServerStop()
+		httpproxy.HttpServerStop()
+		httpproxy.HttpsServerStop()
+	}
 }
