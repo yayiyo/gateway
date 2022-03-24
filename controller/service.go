@@ -507,7 +507,7 @@ func (*ServiceController) AddTCPService(ctx *gin.Context) {
 	grpcRuleSearch := &dao.GrpcRule{
 		Port: params.Port,
 	}
-	if _, err := grpcRuleSearch.Find(ctx, db, grpcRuleSearch); err == nil {
+	if err = grpcRuleSearch.Find(ctx, db, grpcRuleSearch); err == nil {
 		middleware.ResponseError(ctx, 10005, errors.New("服务端口被占用，请重新输入"))
 		return
 	}
@@ -718,7 +718,7 @@ func (*ServiceController) AddGrpcService(ctx *gin.Context) {
 	grpcRuleSearch := &dao.GrpcRule{
 		Port: params.Port,
 	}
-	if _, err := grpcRuleSearch.Find(ctx, db, grpcRuleSearch); err == nil {
+	if err = grpcRuleSearch.Find(ctx, db, grpcRuleSearch); err == nil {
 		middleware.ResponseError(ctx, 10005, errors.New("服务端口被占用，请重新输入"))
 		return
 	}

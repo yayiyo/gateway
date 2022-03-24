@@ -17,10 +17,9 @@ func (t *GrpcRule) TableName() string {
 	return "grpc_rule"
 }
 
-func (t *GrpcRule) Find(c *gin.Context, tx *gorm.DB, search *GrpcRule) (*GrpcRule, error) {
-	model := &GrpcRule{}
-	err := tx.SetCtx(public.GetGinTraceContext(c)).Where(search).Find(model).Error
-	return model, err
+func (t *GrpcRule) Find(c *gin.Context, tx *gorm.DB, search *GrpcRule) error {
+	err := tx.SetCtx(public.GetGinTraceContext(c)).Where(search).Find(t).Error
+	return err
 }
 
 func (t *GrpcRule) Save(c *gin.Context, tx *gorm.DB) error {

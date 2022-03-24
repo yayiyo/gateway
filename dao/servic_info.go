@@ -42,7 +42,7 @@ func (s *ServiceInfo) ServiceDetail(c *gin.Context, tx *gorm.DB, search *Service
 		return nil, err
 	}
 	grpcRule := &GrpcRule{ServiceID: search.ID}
-	grpcRule, err = grpcRule.Find(c, tx, grpcRule)
+	err = grpcRule.Find(c, tx, grpcRule)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
