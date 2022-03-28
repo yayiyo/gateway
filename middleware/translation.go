@@ -2,6 +2,10 @@ package middleware
 
 import (
 	"fmt"
+	"reflect"
+	"regexp"
+	"strings"
+
 	"github.com/e421083458/go_gateway/public"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/locales/en"
@@ -10,9 +14,6 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 	en_translations "gopkg.in/go-playground/validator.v9/translations/en"
 	zh_translations "gopkg.in/go-playground/validator.v9/translations/zh"
-	"reflect"
-	"regexp"
-	"strings"
 )
 
 //设置Translation
@@ -120,7 +121,7 @@ func TranslationMiddleware() gin.HandlerFunc {
 				return t
 			})
 			val.RegisterTranslation("valid_service_name", trans, func(ut ut.Translator) error {
-				return ut.Add("valid_service_name", "{0} 不符合输入格式", true)
+				return ut.Add("valid_service_name", "{0} 不符合输入格式，要求6-128位，由数字、字母、下划线组成", true)
 			}, func(ut ut.Translator, fe validator.FieldError) string {
 				t, _ := ut.T("valid_service_name", fe.Field())
 				return t
