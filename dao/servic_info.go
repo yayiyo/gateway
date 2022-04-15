@@ -100,7 +100,7 @@ func (s *ServiceInfo) ServiceList(ctx *gin.Context, db *gorm.DB, input *dto.Serv
 		return nil, 0, err
 	}
 
-	return list, int64(len(list)), nil
+	return list, total, nil
 }
 
 func (s *ServiceInfo) Find(c *gin.Context, db *gorm.DB, search *ServiceInfo) error {
