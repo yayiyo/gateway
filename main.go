@@ -23,6 +23,15 @@ var (
 	config   = flag.String("config", "", "input config file like ./conf/dev/")
 )
 
+// @host localhost:8080
+// @BasePath /api/v1
+// @query.collection.format multi
+
+// @securityDefinitions.basic BasicAuth
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	flag.Parse()
 	if *endpoint == "" {

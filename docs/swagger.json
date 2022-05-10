@@ -3,6 +3,8 @@
     "info": {
         "contact": {}
     },
+    "host": "localhost:8080",
+    "basePath": "/api/v1",
     "paths": {
         "/admin/change_pwd": {
             "post": {
@@ -2152,6 +2154,16 @@
                 "stack": {},
                 "trace_id": {}
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        },
+        "BasicAuth": {
+            "type": "basic"
         }
     }
 }

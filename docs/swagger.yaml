@@ -1,3 +1,4 @@
+basePath: /api/v1
 definitions:
   dao.AccessControl:
     properties:
@@ -740,6 +741,7 @@ definitions:
       stack: {}
       trace_id: {}
     type: object
+host: localhost:8080
 info:
   contact: {}
 paths:
@@ -1401,4 +1403,11 @@ paths:
       summary: TCP服务更新
       tags:
       - 服务管理
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+  BasicAuth:
+    type: basic
 swagger: "2.0"

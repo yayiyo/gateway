@@ -2172,6 +2172,16 @@ var doc = `{
                 "trace_id": {}
             }
         }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        },
+        "BasicAuth": {
+            "type": "basic"
+        }
     }
 }`
 
@@ -2187,8 +2197,8 @@ type swaggerInfo struct {
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
 	Version:     "",
-	Host:        "",
-	BasePath:    "",
+	Host:        "localhost:8080",
+	BasePath:    "/api/v1",
 	Schemes:     []string{},
 	Title:       "",
 	Description: "",
