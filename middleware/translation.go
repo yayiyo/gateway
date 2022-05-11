@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/e421083458/go_gateway/public"
+	"gateway/public"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/locales/en"
 	"github.com/go-playground/locales/zh"

@@ -3,9 +3,10 @@ module gateway
 go 1.16
 
 require (
+	github.com/boj/redistore v0.0.0-20180917114910-cd5dcc76aeff // indirect
 	github.com/denisenkom/go-mssqldb v0.12.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/e421083458/go_gateway v0.0.0-20200620084504-d602eb8bc883
+	github.com/e421083458/gorm v1.0.1 // indirect
 	github.com/echaser/gorm v1.0.1
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
 	github.com/garyburd/redigo v1.6.0
@@ -15,6 +16,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.0
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/gorilla/sessions v1.2.1 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.3 // indirect
 	github.com/lib/pq v1.10.4 // indirect
 	github.com/mattn/go-sqlite3 v1.14.11 // indirect
@@ -26,5 +28,6 @@ require (
 	github.com/swaggo/swag v1.7.9
 	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1
 	google.golang.org/grpc v1.36.1
+	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.31.0
 )
