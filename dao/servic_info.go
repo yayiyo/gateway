@@ -86,10 +86,12 @@ func (s *ServiceInfo) ServiceList(ctx *gin.Context, db *gorm.DB, input *dto.Serv
 
 	offset := (input.Page - 1) * input.Size
 
-	query := db.SetCtx(public.GetGinTraceContext(ctx)).Table(s.TableName()).Where("is_delete=0")
+	query := db.SetCtx(public.GetGinTraceContext(ctx)).Table(s.TableName())
 
 	if input.Info != "" {
-		query.Where(`(service_name like %?%) or (service_desc like %?%)`, input.Info, input.Info)
+		query = query.Where("(service_name like ? or service_desc like ?) and is_delete=0", "%"+input.Info+"%", "%"+input.Info+"%")
+	} else {
+		query = query.Where("is_delete=0")
 	}
 
 	if err = query.Limit(input.Size).Offset(offset).Find(&list).Order("id desc").Error; err != nil {
